@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cable Leaf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #2d5a3d;
+      --green-light: #e8f0ea;
+      --green-mid: #4a7c5e;
+      --ink: #111810;
+      --ink-soft: #3d4a3f;
+      --mist: #f5f7f5;
+      --white: #ffffff;
+      --border: #d8e2da;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: #ffffff;
+      color: #111810;
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== HEADER ===== */
+    #site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 999;
+      height: 60px;
+      background: #ffffff;
+      border-bottom: 1px solid #d8e2da;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+    }
+
+    #site-logo {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: #111810;
+      text-decoration: none;
+    }
+
+    #desktop-nav {
+      display: flex;
+      list-style: none;
+      gap: 32px;
+      align-items: center;
+    }
+
+    #desktop-nav a {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 14px;
+      color: #3d4a3f;
+      text-decoration: none;
+    }
+
+    #desktop-nav a:hover { color: #2d5a3d; }
+
+    #desktop-nav .cta-btn {
+      background: #2d5a3d;
+      color: #ffffff !important;
+      padding: 8px 18px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    #hamburger-btn {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+    }
+
+    #hamburger-btn span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #111810;
+      border-radius: 2px;
+      transition: transform 0.25s, opacity 0.25s;
+    }
+
+    #hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    #hamburger-btn.open span:nth-child(2) { opacity: 0; }
+    #hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* ===== MOBILE MENU ===== */
+    #mobile-menu {
+      display: none;
+      position: fixed;
+      top: 60px;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-bottom: 1px solid #d8e2da;
+      z-index: 998;
+      flex-direction: column;
+    }
+
+    #mobile-menu.open { display: flex; }
+
+    #mobile-menu a {
+      display: block;
+      padding: 16px 24px;
+      font-size: 16px;
+      color: #3d4a3f;
+      text-decoration: none;
+      border-bottom: 1px solid #d8e2da;
+    }
+
+    #mobile-menu a:last-child {
+      border-bottom: none;
+      background: #2d5a3d;
+      color: #ffffff;
+      font-weight: 500;
+      text-align: center;
+      margin: 12px 16px 16px;
+      border-radius: 4px;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      padding: 100px 24px 60px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #4a7c5e;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards 0.1s;
+    }
+
+    .hero h1 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(2.6rem, 7vw, 5.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: #111810;
+      max-width: 14ch;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards 0.25s;
+    }
+
+    .hero h1 em { font-style: italic; color: #2d5a3d; }
+
+    .hero-sub {
+      font-size: 18px;
+      font-weight: 300;
+      color: #3d4a3f;
+      max-width: 46ch;
+      line-height: 1.75;
+      margin-bottom: 36px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards 0.4s;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards 0.55s;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      background: #2d5a3d;
+      color: #ffffff;
+      padding: 13px 28px;
+      border-radius: 4px;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover { background: #4a7c5e; }
+
+    .btn-ghost {
+      display: inline-block;
+      border: 1px solid #d8e2da;
+      color: #3d4a3f;
+      padding: 13px 28px;
+      border-radius: 4px;
+      font-size: 15px;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-ghost:hover { border-color: #2d5a3d; color: #2d5a3d; }
+
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 1px solid #d8e2da;
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards 0.7s;
+    }
+
+    .hero-stat-num {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 32px;
+      color: #2d5a3d;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .hero-stat-label { font-size: 13px; color: #3d4a3f; font-weight: 300; }
+
+    /* ===== SECTIONS ===== */
+    section { padding: 80px 24px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    .label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #4a7c5e;
+      margin-bottom: 12px;
+    }
+
+    .title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(1.9rem, 4vw, 2.9rem);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: #111810;
+      margin-bottom: 16px;
+    }
+
+    .intro {
+      font-size: 16px;
+      font-weight: 300;
+      color: #3d4a3f;
+      max-width: 52ch;
+      line-height: 1.75;
+    }
+
+    /* ===== PROBLEM ===== */
+    .problem { background: #111810; }
+
+    .problem .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .problem .label { color: #7aab8a; }
+    .problem .title { color: #ffffff; }
+    .problem .intro { color: #a8b8aa; }
+
+    .problem-list { display: flex; flex-direction: column; gap: 16px; }
+
+    .problem-item {
+      display: flex;
+      gap: 14px;
+      padding: 16px;
+      border: 1px solid #2a3a2c;
+      border-radius: 6px;
+      background: #161f17;
+    }
+
+    .problem-icon {
+      width: 36px; height: 36px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: #2a3a2c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .problem-item h4 { font-size: 14px; font-weight: 500; color: #ffffff; margin-bottom: 4px; }
+    .problem-item p  { font-size: 13px; color: #7a8a7c; font-weight: 300; }
+
+    /* ===== HOW ===== */
+    .how { background: #f5f7f5; }
+
+    .how-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      margin-top: 56px;
+    }
+
+    .how-col-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 22px;
+      color: #111810;
+      margin-bottom: 28px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid #2d5a3d;
+      display: inline-block;
+    }
+
+    .how-steps { display: flex; flex-direction: column; gap: 24px; }
+    .how-step  { display: flex; gap: 16px; }
+
+    .step-num {
+      width: 30px; height: 30px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: #2d5a3d;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .how-step h4 { font-size: 14px; font-weight: 500; color: #111810; margin-bottom: 4px; }
+    .how-step p  { font-size: 13px; color: #3d4a3f; font-weight: 300; line-height: 1.6; }
+
+    /* ===== PRICING ===== */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 56px;
+    }
+
+    .pricing-card {
+      border: 1px solid #d8e2da;
+      border-radius: 8px;
+      padding: 32px;
+      background: #ffffff;
+      position: relative;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .pricing-card:hover { box-shadow: 0 8px 28px rgba(45,90,61,0.1); transform: translateY(-2px); }
+    .pricing-card.featured { border-color: #2d5a3d; background: #2d5a3d; }
+
+    .pricing-badge {
+      position: absolute;
+      top: -12px; left: 50%;
+      transform: translateX(-50%);
+      background: #4a7c5e;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .pricing-card h3 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 20px;
+      color: #111810;
+      margin-bottom: 6px;
+    }
+
+    .pricing-card.featured h3 { color: #ffffff; }
+
+    .pricing-price {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 42px;
+      color: #2d5a3d;
+      line-height: 1;
+      margin: 14px 0 4px;
+    }
+
+    .pricing-card.featured .pricing-price { color: #a8d4b4; }
+
+    .pricing-period { font-size: 12px; color: #3d4a3f; margin-bottom: 20px; }
+    .pricing-card.featured .pricing-period { color: #a8c8b0; }
+
+    .pricing-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .pricing-features li {
+      font-size: 13px;
+      color: #3d4a3f;
+      font-weight: 300;
+      display: flex;
+      gap: 8px;
+    }
+
+    .pricing-card.featured .pricing-features li { color: #c8e0cc; }
+    .pricing-features li::before { content: '✓'; color: #2d5a3d; font-weight: 500; }
+    .pricing-card.featured .pricing-features li::before { color: #a8d4b4; }
+
+    .pricing-card .btn-primary { width: 100%; text-align: center; }
+
+    .btn-white {
+      display: inline-block;
+      background: #ffffff;
+      color: #2d5a3d;
+      padding: 13px 28px;
+      border-radius: 4px;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      width: 100%;
+      text-align: center;
+    }
+
+    .pricing-note {
+      margin-top: 28px;
+      text-align: center;
+      font-size: 13px;
+      color: #3d4a3f;
+      font-weight: 300;
+    }
+
+    /* ===== MANIFESTO ===== */
+    .manifesto { background: #e8f0ea; }
+    .manifesto .container { max-width: 680px; text-align: center; }
+
+    .manifesto blockquote {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(1.4rem, 3vw, 2.1rem);
+      line-height: 1.45;
+      color: #111810;
+      margin: 28px 0;
+      font-style: italic;
+    }
+
+    .manifesto cite {
+      font-size: 12px;
+      color: #4a7c5e;
+      font-style: normal;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ===== FOOTER ===== */
+    footer { background: #111810; padding: 40px 24px; }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-logo {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 20px;
+      color: #a8b8aa;
+    }
+
+    footer p { font-size: 13px; color: #6a7a6c; }
+    footer ul { display: flex; gap: 24px; list-style: none; }
+    footer ul a { font-size: 13px; color: #6a7a6c; text-decoration: none; }
+    footer ul a:hover { color: #a8b8aa; }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      #desktop-nav { display: none; }
+      #hamburger-btn { display: flex; }
+
+      .hero { padding: 80px 20px 48px; }
+
+      .problem .container,
+      .how-grid { grid-template-columns: 1fr; gap: 32px; }
+
+      .pricing-grid { grid-template-columns: 1fr; }
+
+      .hero-stats { gap: 28px; }
+
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+      footer ul { flex-wrap: wrap; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header id="site-header">
+    <a href="#" id="site-logo">Cable Leaf</a>
+    <ul id="desktop-nav">
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="browse.html">Browse books</a></li>
+      <li><a href="readers.html">Get early access</a></li>
+      <li><a href="readers.html">Get early access</a>
+    <a href="dashboard.html">My books</a></li>
+      <li><a href="upload.html" class="cta-btn">Submit your book</a></li>
+    </ul>
+    <button id="hamburger-btn" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- MOBILE MENU -->
+  <nav id="mobile-menu">
+    <a href="#how-it-works">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="browse.html">Browse books</a>
+    <a href="readers.html">Get early access</a>
+    <a href="dashboard.html">My books</a>
+    <a href="upload.html">Submit your book</a>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <p class="hero-eyebrow">Book discovery, done fairly</p>
+    <h1>Every book gets a <em>real</em> chance to be seen.</h1>
+    <p class="hero-sub">Cable Leaf is a discovery platform where unknown authors receive guaranteed, measurable exposure — not based on followers, ratings, or algorithmic luck.</p>
+    <div class="hero-actions">
+      <a href="upload.html" class="btn-primary">Submit your book</a>
+      <a href="browse.html" class="btn-ghost">Browse books</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <span class="hero-stat-num">1,000</span>
+        <span class="hero-stat-label">Guaranteed impressions<br>per discovery window</span>
+      </div>
+      <div>
+        <span class="hero-stat-num">30</span>
+        <span class="hero-stat-label">Days of structured<br>exposure</span>
+      </div>
+      <div>
+        <span class="hero-stat-num">$25</span>
+        <span class="hero-stat-label">Flat fee — no bidding,<br>no competition</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROBLEM -->
+  <section class="problem">
+    <div class="container">
+      <div class="reveal">
+        <p class="label">The problem</p>
+        <h2 class="title">Most platforms reward momentum, not opportunity.</h2>
+        <p class="intro">Visibility on traditional book platforms is driven by ratings, reviews, and follower counts. Books that gain early attention keep gaining more. New authors stay invisible.</p>
+      </div>
+      <div class="problem-list reveal">
+        <div class="problem-item">
+          <div class="problem-icon">📊</div>
+          <div>
+            <h4>Algorithms favor the already-popular</h4>
+            <p>Ranking systems surface books with traction, creating a loop that new authors can't enter.</p>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="problem-icon">👁️</div>
+          <div>
+            <h4>Visibility is uncertain and unpredictable</h4>
+            <p>Authors have no idea how many people will actually see their work, or when.</p>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="problem-icon">🔁</div>
+          <div>
+            <h4>Discovery depends on social proof</h4>
+            <p>Without reviews or followers, a book appears untrustworthy — before anyone has read it.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="how-it-works">
+    <div class="container">
+      <div class="reveal">
+        <p class="label">How it works</p>
+        <h2 class="title">Structured exposure for authors. Genuine discovery for readers.</h2>
+        <p class="intro">Cable Leaf treats visibility as a service — predictable, measurable, and fair by design.</p>
+      </div>
+      <div class="how-grid">
+        <div class="reveal">
+          <span class="how-col-title">For authors</span>
+          <div class="how-steps">
+            <div class="how-step"><div class="step-num">1</div><div><h4>Upload your book</h4><p>Submit a cover, blurb, genre tags, and a sample chapter. We review and approve within 48 hours.</p></div></div>
+            <div class="how-step"><div class="step-num">2</div><div><h4>Pay a flat fee</h4><p>Choose your discovery window. One payment, no bidding, no ongoing spend required.</p></div></div>
+            <div class="how-step"><div class="step-num">3</div><div><h4>Enter the rotation</h4><p>Your book is shown to readers in genre-matched feeds. Impressions are tracked in real time.</p></div></div>
+            <div class="how-step"><div class="step-num">4</div><div><h4>Track your performance</h4><p>See how many times your book was shown, clicked, previewed, and saved.</p></div></div>
+          </div>
+        </div>
+        <div class="reveal">
+          <span class="how-col-title">For readers</span>
+          <div class="how-steps">
+            <div class="how-step"><div class="step-num">1</div><div><h4>Browse freely</h4><p>No account needed. Pick your genres and start exploring — a rotating feed of books you haven't seen before.</p></div></div>
+            <div class="how-step"><div class="step-num">2</div><div><h4>Read a sample</h4><p>Every book includes a sample chapter. Decide if it's for you before going anywhere else.</p></div></div>
+            <div class="how-step"><div class="step-num">3</div><div><h4>Save what interests you</h4><p>Build a personal reading queue as you browse. Return to it whenever you're ready.</p></div></div>
+            <div class="how-step"><div class="step-num">4</div><div><h4>Get it wherever you like</h4><p>We'll point you directly to where the author sells. No middleman, no markup from us.</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <div class="container">
+      <div class="reveal">
+        <p class="label">Pricing</p>
+        <h2 class="title">Simple, flat pricing. No surprises.</h2>
+        <p class="intro">You know exactly what you're getting before you pay. Every window includes guaranteed impressions, real-time tracking, and a sample chapter slot.</p>
+      </div>
+      <div class="pricing-grid reveal">
+        <div class="pricing-card">
+          <h3>Discovery Window</h3>
+          <div class="pricing-price">$25</div>
+          <p class="pricing-period">One-time · renewable anytime</p>
+          <ul class="pricing-features">
+            <li>1,000 guaranteed impressions</li>
+            <li>30-day rotation period</li>
+            <li>Cover, blurb &amp; sample chapter</li>
+            <li>Real-time impression tracking</li>
+            <li>Click and save analytics</li>
+          </ul>
+          <a href="upload.html" class="btn-primary">Get started</a>
+        </div>
+        <div class="pricing-card featured">
+          <div class="pricing-badge">Most popular</div>
+          <h3>Discovery + Boost</h3>
+          <div class="pricing-price">$40</div>
+          <p class="pricing-period">One-time · renewable anytime</p>
+          <ul class="pricing-features">
+            <li>1,000 guaranteed impressions</li>
+            <li>15-day delivery (2&#215; speed)</li>
+            <li>Cover, blurb &amp; sample chapter</li>
+            <li>Real-time impression tracking</li>
+            <li>Click and save analytics</li>
+          </ul>
+          <a href="upload.html" class="btn-white">Get started</a>
+        </div>
+        <div class="pricing-card">
+          <h3>Extended Window</h3>
+          <div class="pricing-price">$49</div>
+          <p class="pricing-period">One-time · renewable anytime</p>
+          <ul class="pricing-features">
+            <li>2,500 guaranteed impressions</li>
+            <li>60-day rotation period</li>
+            <li>Cover, blurb &amp; sample chapter</li>
+            <li>Real-time impression tracking</li>
+            <li>Click and save analytics</li>
+          </ul>
+          <a href="upload.html" class="btn-primary">Get started</a>
+        </div>
+      </div>
+      <p class="pricing-note reveal">All plans are one-time payments. Renew when you're ready — no subscriptions, no lock-in.</p>
+    </div>
+  </section>
+
+  <!-- MANIFESTO -->
+  <section class="manifesto">
+    <div class="container reveal">
+      <p class="label">Our commitment</p>
+      <blockquote>"Visibility shouldn't be a competition. Every book deserves a real chance to be noticed — regardless of who wrote it or how many followers they have."</blockquote>
+      <cite>— The Cable Leaf principle</cite>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-logo">Cable Leaf</span>
+      <p>&#169; 2026 Cable Leaf. Built for unknown authors, everywhere.</p>
+      <ul>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Authors</a></li>
+        <li><a href="#">Readers</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script>
+    const btn = document.getElementById('hamburger-btn');
+    const menu = document.getElementById('mobile-menu');
+
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('open');
+      menu.classList.toggle('open');
+    });
+
+    menu.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        btn.classList.remove('open');
+        menu.classList.remove('open');
+      });
+    });
+
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get Early Access — Cable Leaf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #2d5a3d;
+      --green-light: #e8f0ea;
+      --green-mid: #4a7c5e;
+      --ink: #111810;
+      --ink-soft: #3d4a3f;
+      --mist: #f5f7f5;
+      --white: #ffffff;
+      --border: #d8e2da;
+      --red: #c0392b;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--white);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 999;
+      height: 60px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+    }
+
+    .logo {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 22px;
+      color: #111810;
+      text-decoration: none;
+    }
+
+    .header-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      list-style: none;
+    }
+
+    .header-links a {
+      font-size: 14px;
+      color: var(--ink-soft);
+      text-decoration: none;
+    }
+
+    .header-links a:hover { color: var(--green); }
+
+    .header-links .cta {
+      background: var(--green);
+      color: #ffffff !important;
+      padding: 7px 16px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #111810;
+      border-radius: 2px;
+      transition: transform 0.25s, opacity 0.25s;
+    }
+
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 60px; left: 0; right: 0;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      z-index: 998;
+      flex-direction: column;
+    }
+
+    .mobile-menu.open { display: flex; }
+
+    .mobile-menu a {
+      display: block;
+      padding: 16px 24px;
+      font-size: 16px;
+      color: var(--ink-soft);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .mobile-menu a:last-child {
+      border-bottom: none;
+      background: var(--green);
+      color: #ffffff;
+      font-weight: 500;
+      text-align: center;
+      margin: 12px 16px 16px;
+      border-radius: 4px;
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 80px 24px 60px;
+      gap: 80px;
+    }
+
+    .hero-left {}
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+      margin-bottom: 16px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.1s;
+    }
+
+    .hero-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.2s;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--green);
+    }
+
+    .hero-sub {
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--ink-soft);
+      line-height: 1.75;
+      margin-bottom: 32px;
+      max-width: 44ch;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.3s;
+    }
+
+    /* SOCIAL PROOF */
+    .social-proof {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.4s;
+    }
+
+    .avatars {
+      display: flex;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      background: var(--green-light);
+      margin-left: -8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    .avatar:first-child { margin-left: 0; }
+
+    .social-proof-text {
+      font-size: 13px;
+      color: var(--ink-soft);
+      font-weight: 300;
+    }
+
+    .social-proof-text strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    /* FORM CARD */
+    .form-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 36px;
+      box-shadow: 0 4px 32px rgba(45,90,61,0.08);
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.2s;
+    }
+
+    .form-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.4rem;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .form-sub {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--ink-soft);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    .form-group { margin-bottom: 18px; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="email"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(45,90,61,0.08);
+    }
+
+    input.error { border-color: var(--red); }
+
+    .error-msg {
+      font-size: 12px;
+      color: var(--red);
+      margin-top: 5px;
+      display: none;
+    }
+
+    .error-msg.visible { display: block; }
+
+    /* GENRE PICKER */
+    .genre-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .genre-label span {
+      font-weight: 300;
+      color: var(--ink-soft);
+      font-size: 12px;
+    }
+
+    .genre-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .genre-chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 12px;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .genre-chip:hover { border-color: var(--green-mid); color: var(--green); }
+
+    .genre-chip.selected {
+      background: var(--green);
+      border-color: var(--green);
+      color: #ffffff;
+    }
+
+    .genre-error {
+      font-size: 12px;
+      color: var(--red);
+      margin-top: 6px;
+      display: none;
+    }
+
+    .genre-error.visible { display: block; }
+
+    /* SUBMIT */
+    .btn-submit {
+      width: 100%;
+      background: var(--green);
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      border-radius: 6px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-submit:hover { background: var(--green-mid); }
+    .btn-submit:disabled { background: #a8b8aa; cursor: not-allowed; }
+
+    .btn-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    .btn-submit.loading .btn-spinner { display: block; }
+    .btn-submit.loading .btn-text { display: none; }
+
+    .form-note {
+      font-size: 11px;
+      color: var(--ink-soft);
+      text-align: center;
+      margin-top: 12px;
+      font-weight: 300;
+    }
+
+    /* SUCCESS */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .success-screen.visible { display: block; }
+
+    .success-icon {
+      width: 60px;
+      height: 60px;
+      background: var(--green-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin: 0 auto 20px;
+    }
+
+    .success-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.5rem;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+
+    .success-msg {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--ink-soft);
+      line-height: 1.75;
+      margin-bottom: 24px;
+    }
+
+    .success-email {
+      font-weight: 500;
+      color: var(--green);
+    }
+
+    .btn-browse {
+      display: inline-block;
+      background: var(--green);
+      color: #ffffff;
+      padding: 11px 24px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      margin-right: 10px;
+    }
+
+    .btn-share {
+      display: inline-block;
+      border: 1px solid var(--border);
+      color: var(--ink-soft);
+      padding: 11px 24px;
+      border-radius: 4px;
+      font-size: 14px;
+      text-decoration: none;
+      cursor: pointer;
+      background: none;
+      font-family: 'DM Sans', system-ui, sans-serif;
+    }
+
+    /* WHY SECTION */
+    .why {
+      background: var(--mist);
+      padding: 80px 24px;
+    }
+
+    .why-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .why-eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+      margin-bottom: 12px;
+    }
+
+    .why-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      color: var(--ink);
+      margin-bottom: 48px;
+      max-width: 22ch;
+      line-height: 1.15;
+    }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+
+    .why-item {}
+
+    .why-icon {
+      font-size: 28px;
+      margin-bottom: 14px;
+    }
+
+    .why-item h3 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.15rem;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .why-item p {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--ink-soft);
+      line-height: 1.7;
+    }
+
+    /* COUNTER */
+    .counter-strip {
+      background: var(--green);
+      padding: 32px 24px;
+      text-align: center;
+    }
+
+    .counter-strip p {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    .counter-strip span {
+      font-style: italic;
+    }
+
+    .counter-num {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--ink);
+      padding: 32px 24px;
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-logo {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 18px;
+      color: #a8b8aa;
+    }
+
+    footer p { font-size: 12px; color: #6a7a6c; }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .header-links { display: none; }
+      .hamburger { display: flex; }
+      .hero { grid-template-columns: 1fr; gap: 40px; padding-top: 88px; min-height: auto; }
+      .why-grid { grid-template-columns: 1fr; gap: 28px; }
+      .hero-sub { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <a href="index.html" class="logo">Cable Leaf</a>
+    <ul class="header-links">
+      <li><a href="browse.html">Browse books</a></li>
+      <li><a href="index.html#how-it-works">How it works</a></li>
+      <li><a href="upload.html" class="cta">Submit your book</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="browse.html">Browse books</a>
+    <a href="dashboard.html">My books</a>
+    <a href="upload.html">Submit your book</a>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+
+    <!-- LEFT -->
+    <div class="hero-left">
+      <p class="eyebrow">Early access — limited spots</p>
+      <h1 class="hero-title">Be first to discover books the world hasn't found <em>yet.</em></h1>
+      <p class="hero-sub">Cable Leaf is a new kind of book discovery platform — built on fairness, not algorithms. Every book gets a guaranteed chance to be seen. Join early and you'll be among the first readers when we launch.</p>
+
+      <div class="social-proof">
+        <div class="avatars">
+          <div class="avatar">A</div>
+          <div class="avatar">K</div>
+          <div class="avatar">T</div>
+          <div class="avatar">M</div>
+        </div>
+        <p class="social-proof-text"><strong id="readerCount">—</strong> readers already signed up</p>
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <div>
+      <div class="form-card" id="formCard">
+
+        <div id="formContent">
+          <h2 class="form-title">Get early access</h2>
+          <p class="form-sub">Sign up now and we'll notify you the moment books go live — matched to your favourite genres.</p>
+
+          <div class="form-group">
+            <label for="nameInput">Your name</label>
+            <input type="text" id="nameInput" placeholder="First name is fine" maxlength="60" />
+            <div class="error-msg" id="nameErr">Please enter your name.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="emailInput">Email address</label>
+            <input type="email" id="emailInput" placeholder="you@example.com" />
+            <div class="error-msg" id="emailErr">Please enter a valid email address.</div>
+          </div>
+
+          <div class="form-group">
+            <span class="genre-label">What do you like to read? <span>(pick at least one)</span></span>
+            <div class="genre-grid" id="genreGrid">
+              <div class="genre-chip" data-genre="Fiction">Fiction</div>
+              <div class="genre-chip" data-genre="Literary Fiction">Literary Fiction</div>
+              <div class="genre-chip" data-genre="Non-Fiction">Non-Fiction</div>
+              <div class="genre-chip" data-genre="Mystery">Mystery</div>
+              <div class="genre-chip" data-genre="Romance">Romance</div>
+              <div class="genre-chip" data-genre="Sci-Fi">Sci-Fi</div>
+              <div class="genre-chip" data-genre="Fantasy">Fantasy</div>
+              <div class="genre-chip" data-genre="Thriller">Thriller</div>
+              <div class="genre-chip" data-genre="Horror">Horror</div>
+              <div class="genre-chip" data-genre="Young Adult">Young Adult</div>
+              <div class="genre-chip" data-genre="Biography">Biography</div>
+              <div class="genre-chip" data-genre="Memoir">Memoir</div>
+              <div class="genre-chip" data-genre="Self-Help">Self-Help</div>
+              <div class="genre-chip" data-genre="Poetry">Poetry</div>
+            </div>
+            <div class="genre-error" id="genreErr">Please select at least one genre.</div>
+          </div>
+
+          <button class="btn-submit" id="submitBtn" onclick="handleSignup()">
+            <div class="btn-spinner"></div>
+            <span class="btn-text">Get early access →</span>
+          </button>
+
+          <p class="form-note">No spam, ever. Just a single email when we launch — and only books in your chosen genres.</p>
+        </div>
+
+        <!-- SUCCESS -->
+        <div class="success-screen" id="successScreen">
+          <div class="success-icon">🎉</div>
+          <h2 class="success-title">You're on the list!</h2>
+          <p class="success-msg">We'll email <span class="success-email" id="successEmail"></span> the moment books go live in your genres. In the meantime, tell a fellow reader about Cable Leaf.</p>
+          <a href="browse.html" class="btn-browse">Browse early</a>
+          <button class="btn-share" onclick="shareLink()">Share with a friend</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- COUNTER STRIP -->
+  <div class="counter-strip">
+    <p>
+      <span class="counter-num" id="counterNum">—</span>
+      <span>readers already waiting for launch</span>
+    </p>
+  </div>
+
+  <!-- WHY -->
+  <section class="why">
+    <div class="why-inner">
+      <p class="why-eyebrow reveal">Why Cable Leaf</p>
+      <h2 class="why-title reveal">Discovery that's actually fair.</h2>
+      <div class="why-grid">
+        <div class="why-item reveal">
+          <div class="why-icon">🔄</div>
+          <h3>No algorithms, no popularity bias</h3>
+          <p>Every book in our feed gets the same structured exposure. You see books based on your genres — not what's already trending.</p>
+        </div>
+        <div class="why-item reveal">
+          <div class="why-icon">📖</div>
+          <h3>Read before you commit</h3>
+          <p>Every book comes with a sample chapter. You decide if it's for you before going anywhere else. No pressure, no noise.</p>
+        </div>
+        <div class="why-item reveal">
+          <div class="why-icon">✨</div>
+          <h3>Find the book no one's heard of yet</h3>
+          <p>Cable Leaf exists to surface the books that deserve attention but haven't had their moment yet. Be the reader who finds them first.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-logo">Cable Leaf</span>
+      <p>© 2026 Cable Leaf. Built for unknown authors, everywhere.</p>
+    </div>
+  </footer>
+
+  <script>
+    const { createClient } = supabase;
+    const sb = createClient(
+      'https://zywuflscptoqzsuqgiun.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5d3VmbHNjcHRvcXpzdXFnaXVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDQ4OTIsImV4cCI6MjA4OTY4MDg5Mn0.U6QsDC1GxtzTgfKOdNHgfFaugt0DK2uRYy6ILnFUs5c'
+    );
+
+    let selectedGenres = [];
+
+    // ── LOAD READER COUNT ──
+    async function loadCount() {
+      const { count } = await sb.from('readers').select('*', { count: 'exact', head: true });
+      const num = count || 0;
+      document.getElementById('readerCount').textContent = num.toLocaleString();
+      document.getElementById('counterNum').textContent = num.toLocaleString();
+    }
+
+    // ── GENRE CHIPS ──
+    document.querySelectorAll('.genre-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        chip.classList.toggle('selected');
+        const genre = chip.dataset.genre;
+        if (chip.classList.contains('selected')) {
+          selectedGenres.push(genre);
+        } else {
+          selectedGenres = selectedGenres.filter(g => g !== genre);
+        }
+        document.getElementById('genreErr').classList.remove('visible');
+      });
+    });
+
+    // ── SIGNUP ──
+    async function handleSignup() {
+      const name  = document.getElementById('nameInput').value.trim();
+      const email = document.getElementById('emailInput').value.trim().toLowerCase();
+      const btn   = document.getElementById('submitBtn');
+
+      // Validate
+      let valid = true;
+
+      if (!name) {
+        document.getElementById('nameErr').classList.add('visible');
+        document.getElementById('nameInput').classList.add('error');
+        valid = false;
+      } else {
+        document.getElementById('nameErr').classList.remove('visible');
+        document.getElementById('nameInput').classList.remove('error');
+      }
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        document.getElementById('emailErr').classList.add('visible');
+        document.getElementById('emailInput').classList.add('error');
+        valid = false;
+      } else {
+        document.getElementById('emailErr').classList.remove('visible');
+        document.getElementById('emailInput').classList.remove('error');
+      }
+
+      if (selectedGenres.length === 0) {
+        document.getElementById('genreErr').classList.add('visible');
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      const { error } = await sb.from('readers').insert({
+        name,
+        email,
+        genres: selectedGenres
+      });
+
+      btn.classList.remove('loading');
+      btn.disabled = false;
+
+      if (error) {
+        if (error.code === '23505') {
+          // Duplicate email
+          document.getElementById('emailErr').textContent = 'This email is already signed up!';
+          document.getElementById('emailErr').classList.add('visible');
+          document.getElementById('emailInput').classList.add('error');
+        } else {
+          alert('Something went wrong. Please try again.');
+        }
+        return;
+      }
+
+      // Show success
+      document.getElementById('successEmail').textContent = email;
+      document.getElementById('formContent').style.display = 'none';
+      document.getElementById('successScreen').classList.add('visible');
+      loadCount();
+    }
+
+    // ── SHARE ──
+    function shareLink() {
+      const url = window.location.href;
+      const text = 'I just signed up for early access to Cable Leaf — a book discovery platform that gives unknown authors a fair shot. Join me:';
+      if (navigator.share) {
+        navigator.share({ title: 'Cable Leaf — Early Access', text, url });
+      } else {
+        navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!'));
+      }
+    }
+
+    // ── SCROLL REVEAL ──
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 100);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+
+    // ── HAMBURGER ──
+    document.getElementById('hamburger').addEventListener('click', function() {
+      this.classList.toggle('open');
+      document.getElementById('mobileMenu').classList.toggle('open');
+    });
+
+    // ── CLEAR ERRORS ON INPUT ──
+    document.getElementById('nameInput').addEventListener('input', () => {
+      document.getElementById('nameErr').classList.remove('visible');
+      document.getElementById('nameInput').classList.remove('error');
+    });
+
+    document.getElementById('emailInput').addEventListener('input', () => {
+      document.getElementById('emailErr').classList.remove('visible');
+      document.getElementById('emailInput').classList.remove('error');
+    });
+
+    document.getElementById('emailInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleSignup();
+    });
+
+    loadCount();
+  </script>
+</body>
+</html>
