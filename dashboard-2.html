@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Books — Cable Leaf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #2d5a3d;
+      --green-light: #e8f0ea;
+      --green-mid: #4a7c5e;
+      --ink: #111810;
+      --ink-soft: #3d4a3f;
+      --mist: #f5f7f5;
+      --white: #ffffff;
+      --border: #d8e2da;
+      --red: #c0392b;
+      --red-light: #fdf0ee;
+      --amber: #d97706;
+      --amber-light: #fffbeb;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--mist);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* HEADER */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 999;
+      height: 60px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+    }
+
+    .logo {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 22px;
+      color: #111810;
+      text-decoration: none;
+    }
+
+    .header-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      list-style: none;
+    }
+
+    .header-links a {
+      font-size: 14px;
+      color: var(--ink-soft);
+      text-decoration: none;
+    }
+
+    .header-links a:hover { color: var(--green); }
+
+    .header-links .cta {
+      background: var(--green);
+      color: #ffffff !important;
+      padding: 7px 16px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #111810;
+      border-radius: 2px;
+      transition: transform 0.25s, opacity 0.25s;
+    }
+
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 60px; left: 0; right: 0;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      z-index: 998;
+      flex-direction: column;
+    }
+
+    .mobile-menu.open { display: flex; }
+
+    .mobile-menu a {
+      display: block;
+      padding: 16px 24px;
+      font-size: 16px;
+      color: var(--ink-soft);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .mobile-menu a:last-child {
+      border-bottom: none;
+      background: var(--green);
+      color: #ffffff;
+      font-weight: 500;
+      text-align: center;
+      margin: 12px 16px 16px;
+      border-radius: 4px;
+    }
+
+    /* PAGE */
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 84px 24px 80px;
+    }
+
+    /* LOGIN */
+    .login-screen {
+      max-width: 440px;
+      margin: 0 auto;
+      padding-top: 20px;
+    }
+
+    .login-eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+      margin-bottom: 12px;
+    }
+
+    .login-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 2rem;
+      color: var(--ink);
+      margin-bottom: 10px;
+      line-height: 1.15;
+    }
+
+    .login-sub {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--ink-soft);
+      margin-bottom: 32px;
+      line-height: 1.65;
+    }
+
+    .login-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 32px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 7px;
+    }
+
+    input[type="email"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      margin-bottom: 16px;
+    }
+
+    input[type="email"]:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(45,90,61,0.08);
+    }
+
+    .btn-login {
+      width: 100%;
+      background: var(--green);
+      color: #ffffff;
+      border: none;
+      padding: 13px;
+      border-radius: 6px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-login:hover { background: var(--green-mid); }
+    .btn-login:disabled { background: #a8b8aa; cursor: not-allowed; }
+
+    .btn-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    .btn-login.loading .btn-spinner { display: block; }
+    .btn-login.loading .btn-text { display: none; }
+
+    .login-error {
+      font-size: 13px;
+      color: var(--red);
+      margin-top: 12px;
+      display: none;
+    }
+
+    .login-error.visible { display: block; }
+
+    /* SENT STATE */
+    .sent-state {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .sent-state.visible { display: block; }
+
+    .sent-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--green-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: 0 auto 20px;
+    }
+
+    .sent-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.5rem;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+
+    .sent-msg {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--ink-soft);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .sent-email {
+      font-weight: 500;
+      color: var(--green);
+    }
+
+    .btn-resend {
+      background: none;
+      border: none;
+      color: var(--green);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* DASHBOARD */
+    .dashboard { display: none; }
+    .dashboard.visible { display: block; }
+
+    .dash-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .dash-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.75rem;
+      color: var(--ink);
+    }
+
+    .dash-email {
+      font-size: 13px;
+      color: var(--ink-soft);
+      font-weight: 300;
+      margin-top: 4px;
+    }
+
+    .btn-signout {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--ink-soft);
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-signout:hover { border-color: var(--red); color: var(--red); }
+
+    /* STATS */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 2rem;
+      color: var(--green);
+      line-height: 1;
+    }
+
+    /* BOOK LIST */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.25rem;
+      color: var(--ink);
+    }
+
+    .section-count {
+      font-size: 12px;
+      color: var(--ink-soft);
+      font-weight: 300;
+    }
+
+    .book-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .book-row {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .book-cover-thumb {
+      width: 52px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .book-cover-placeholder {
+      width: 52px;
+      height: 72px;
+      background: linear-gradient(135deg, var(--green-light), #d0e4d8);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .book-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.05rem;
+      color: var(--ink);
+      margin-bottom: 3px;
+    }
+
+    .book-author {
+      font-size: 12px;
+      color: var(--ink-soft);
+      font-weight: 300;
+      margin-bottom: 12px;
+    }
+
+    .book-meta {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .meta-item { display: flex; flex-direction: column; gap: 2px; }
+
+    .meta-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+
+    .meta-value {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .status-pending  { background: var(--amber-light); color: var(--amber); }
+    .status-approved { background: var(--green-light); color: var(--green); }
+    .status-rejected { background: var(--red-light); color: var(--red); }
+
+    .progress-wrap { margin-top: 4px; }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--ink-soft);
+      margin-bottom: 5px;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      max-width: 280px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 3px;
+    }
+
+    .status-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--ink-soft);
+      font-weight: 300;
+    }
+
+    /* EMPTY / SPINNER */
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--border);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 40px auto;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--ink-soft);
+      font-size: 14px;
+      font-weight: 300;
+    }
+
+    .empty-icon { font-size: 32px; margin-bottom: 12px; }
+
+    .btn-submit-new {
+      display: inline-block;
+      margin-top: 16px;
+      background: var(--green);
+      color: #ffffff;
+      padding: 10px 22px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .header-links { display: none; }
+      .hamburger { display: flex; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 480px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .book-row { grid-template-columns: 44px 1fr; }
+    }
+  </style>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" href="/favicon.ico">
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="logo">Cable Leaf</a>
+    <ul class="header-links">
+      <li><a href="browse.html">Browse books</a></li>
+      <li><a href="upload.html" class="cta">Submit your book</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="browse.html">Browse books</a>
+    <a href="upload.html">Submit your book</a>
+  </nav>
+
+  <main class="page">
+
+    <!-- LOGIN -->
+    <div class="login-screen" id="loginScreen">
+      <p class="login-eyebrow">Author dashboard</p>
+      <h1 class="login-title">Track your book's performance.</h1>
+      <p class="login-sub">Enter the email address you used when submitting your book. We'll send you a secure login link — no password needed.</p>
+
+      <div class="login-card">
+
+        <!-- EMAIL FORM -->
+        <div id="emailForm">
+          <label for="emailInput">Your email address</label>
+          <input type="email" id="emailInput" placeholder="you@example.com" />
+          <button class="btn-login" id="loginBtn" onclick="sendMagicLink()">
+            <div class="btn-spinner"></div>
+            <span class="btn-text">Send login link</span>
+          </button>
+          <p class="login-error" id="loginErr"></p>
+        </div>
+
+        <!-- SENT CONFIRMATION -->
+        <div class="sent-state" id="sentState">
+          <div class="sent-icon">✉️</div>
+          <h2 class="sent-title">Check your inbox</h2>
+          <p class="sent-msg">We sent a login link to <span class="sent-email" id="sentEmail"></span>. Click the link in the email to access your dashboard.</p>
+          <p style="font-size:13px; color:var(--ink-soft); font-weight:300; margin-bottom:12px;">Didn't receive it? Check your spam folder.</p>
+          <button class="btn-resend" onclick="resend()">Resend link</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dashboard" id="dashboard">
+
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-title">My Books</h1>
+          <p class="dash-email" id="dashEmail"></p>
+        </div>
+        <button class="btn-signout" onclick="signOut()">Sign out</button>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Impressions</div>
+          <div class="stat-value" id="statImpressions">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Clicks</div>
+          <div class="stat-value" id="statClicks">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Saves</div>
+          <div class="stat-value" id="statSaves">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Books</div>
+          <div class="stat-value" id="statBooks">—</div>
+        </div>
+      </div>
+
+      <!-- BOOK LIST -->
+      <div class="section-head">
+        <h2 class="section-title">Your submissions</h2>
+        <span class="section-count" id="bookCount"></span>
+      </div>
+      <div class="book-list" id="bookList">
+        <div class="spinner"></div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    const { createClient } = supabase;
+    const sb = createClient(
+      'https://zywuflscptoqzsuqgiun.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5d3VmbHNjcHRvcXpzdXFnaXVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDQ4OTIsImV4cCI6MjA4OTY4MDg5Mn0.U6QsDC1GxtzTgfKOdNHgfFaugt0DK2uRYy6ILnFUs5c'
+    );
+
+    let sentEmailAddress = '';
+
+    // ── CHECK SESSION ON LOAD ──
+    async function init() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        showDashboard(session.user.email);
+      }
+    }
+
+    // ── SEND MAGIC LINK ──
+    async function sendMagicLink() {
+      const email = document.getElementById('emailInput').value.trim().toLowerCase();
+      const errEl = document.getElementById('loginErr');
+      const btn   = document.getElementById('loginBtn');
+
+      errEl.classList.remove('visible');
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errEl.textContent = 'Please enter a valid email address.';
+        errEl.classList.add('visible');
+        return;
+      }
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      const { error } = await sb.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: false }
+      });
+
+      btn.classList.remove('loading');
+      btn.disabled = false;
+
+      if (error) {
+        // shouldCreateUser: false means Supabase returns error if email not registered
+        // but we don't want to reveal whether an email exists — show generic sent message
+        errEl.textContent = 'Something went wrong. Please try again.';
+        errEl.classList.add('visible');
+        return;
+      }
+
+      sentEmailAddress = email;
+      document.getElementById('sentEmail').textContent = email;
+      document.getElementById('emailForm').style.display = 'none';
+      document.getElementById('sentState').classList.add('visible');
+    }
+
+    // ── RESEND ──
+    function resend() {
+      document.getElementById('sentState').classList.remove('visible');
+      document.getElementById('emailForm').style.display = 'block';
+      document.getElementById('emailInput').value = sentEmailAddress;
+    }
+
+    // ── SHOW DASHBOARD ──
+    async function showDashboard(email) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').classList.add('visible');
+      document.getElementById('dashEmail').textContent = email;
+      loadBooks(email);
+    }
+
+    // ── LOAD BOOKS ──
+    async function loadBooks(email) {
+      const { data, error } = await sb
+        .from('books')
+        .select('*')
+        .eq('author_email', email.toLowerCase())
+        .order('created_at', { ascending: false });
+
+      if (error || !data) {
+        document.getElementById('bookList').innerHTML =
+          '<div class="empty-state"><div class="empty-icon">⚠️</div>Could not load your books. Please try again.</div>';
+        return;
+      }
+
+      // Stats
+      document.getElementById('statImpressions').textContent = data.reduce((s, b) => s + (b.impressions || 0), 0).toLocaleString();
+      document.getElementById('statClicks').textContent      = data.reduce((s, b) => s + (b.clicks || 0), 0).toLocaleString();
+      document.getElementById('statSaves').textContent       = data.reduce((s, b) => s + (b.saves || 0), 0).toLocaleString();
+      document.getElementById('statBooks').textContent       = data.length;
+      document.getElementById('bookCount').textContent       = `${data.length} book${data.length !== 1 ? 's' : ''}`;
+
+      if (data.length === 0) {
+        document.getElementById('bookList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📖</div>
+            You haven't submitted any books yet.
+            <br><a href="upload.html" class="btn-submit-new">Submit your first book</a>
+          </div>`;
+        return;
+      }
+
+      document.getElementById('bookList').innerHTML = data.map(book => {
+        const max = book.window_type === 'extended' ? 2500 : 1000;
+        const pct = Math.min(100, Math.round(((book.impressions || 0) / max) * 100));
+        const windowLabel = {
+          basic: '1,000 impressions · 30 days',
+          boost: '1,000 impressions · 15 days (boosted)',
+          extended: '2,500 impressions · 60 days'
+        }[book.window_type] || '—';
+
+        return `
+          <div class="book-row">
+            ${book.cover_url
+              ? `<img class="book-cover-thumb" src="${book.cover_url}" alt="${book.title}" />`
+              : `<div class="book-cover-placeholder">📖</div>`}
+            <div>
+              <div class="book-title">${book.title}</div>
+              <div class="book-author">${book.genre}</div>
+              <div class="book-meta">
+                <div class="meta-item">
+                  <span class="meta-label">Status</span>
+                  <span class="status-badge status-${book.status}">${book.status.charAt(0).toUpperCase() + book.status.slice(1)}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Impressions</span>
+                  <span class="meta-value">${(book.impressions || 0).toLocaleString()}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Clicks</span>
+                  <span class="meta-value">${(book.clicks || 0).toLocaleString()}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Saves</span>
+                  <span class="meta-value">${(book.saves || 0).toLocaleString()}</span>
+                </div>
+              </div>
+              ${book.status === 'approved' ? `
+                <div class="progress-wrap">
+                  <div class="progress-label">
+                    <span>${windowLabel}</span>
+                    <span>${pct}% delivered</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width:${pct}%"></div>
+                  </div>
+                </div>` : `
+                <div class="status-note">
+                  ${book.status === 'pending'  ? '⏳ Under review — we\'ll approve within 48 hours.' : ''}
+                  ${book.status === 'rejected' ? '❌ Not approved. Contact us at adeniyi.abdullah.adebayo@gmail.com for details.' : ''}
+                </div>`}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // ── SIGN OUT ──
+    async function signOut() {
+      await sb.auth.signOut();
+      document.getElementById('dashboard').classList.remove('visible');
+      document.getElementById('loginScreen').style.display = 'block';
+      document.getElementById('emailForm').style.display = 'block';
+      document.getElementById('sentState').classList.remove('visible');
+      document.getElementById('emailInput').value = '';
+    }
+
+    // ── AUTH STATE LISTENER ──
+    sb.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        showDashboard(session.user.email);
+      }
+    });
+
+    // ── HAMBURGER ──
+    document.getElementById('hamburger').addEventListener('click', function() {
+      this.classList.toggle('open');
+      document.getElementById('mobileMenu').classList.toggle('open');
+    });
+
+    document.getElementById('emailInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') sendMagicLink();
+    });
+
+    init();
+  </script>
+</body>
+</html>

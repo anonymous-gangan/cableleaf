@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Cable Leaf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #2d5a3d;
+      --green-light: #e8f0ea;
+      --green-mid: #4a7c5e;
+      --ink: #111810;
+      --ink-soft: #3d4a3f;
+      --mist: #f5f7f5;
+      --white: #ffffff;
+      --border: #d8e2da;
+      --red: #c0392b;
+      --red-light: #fdf0ee;
+      --amber: #d97706;
+      --amber-light: #fffbeb;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--mist);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 999;
+      height: 60px;
+      background: #111810;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+    }
+
+    .logo {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 20px;
+      color: #a8b8aa;
+      text-decoration: none;
+    }
+
+    .admin-badge {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--green);
+      color: #ffffff;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .page {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 84px 24px 80px;
+    }
+
+    /* LOGIN */
+    .login-screen {
+      max-width: 400px;
+      margin: 0 auto;
+      padding-top: 20px;
+    }
+
+    .login-eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+      margin-bottom: 12px;
+    }
+
+    .login-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.9rem;
+      color: var(--ink);
+      margin-bottom: 28px;
+    }
+
+    .login-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 32px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 7px;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      margin-bottom: 16px;
+    }
+
+    input[type="password"]:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(45,90,61,0.08);
+    }
+
+    .btn-login {
+      width: 100%;
+      background: var(--green);
+      color: #ffffff;
+      border: none;
+      padding: 13px;
+      border-radius: 6px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-login:hover { background: var(--green-mid); }
+
+    .login-error {
+      font-size: 13px;
+      color: var(--red);
+      margin-top: 12px;
+      display: none;
+    }
+
+    .login-error.visible { display: block; }
+
+    /* DASHBOARD */
+    .dashboard { display: none; }
+    .dashboard.visible { display: block; }
+
+    .dash-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .dash-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.75rem;
+      color: var(--ink);
+    }
+
+    .dash-sub {
+      font-size: 13px;
+      color: var(--ink-soft);
+      font-weight: 300;
+      margin-top: 4px;
+    }
+
+    .btn-signout {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--ink-soft);
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-signout:hover { border-color: var(--red); color: var(--red); }
+
+    /* STATS */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 2rem;
+      color: var(--green);
+      line-height: 1;
+    }
+
+    /* TABS */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      padding: 10px 18px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--ink-soft);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .tab-btn.active { color: var(--green); border-bottom-color: var(--green); font-weight: 500; }
+
+    .tab-count {
+      background: var(--border);
+      color: var(--ink-soft);
+      font-size: 10px;
+      font-weight: 500;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    .tab-btn.active .tab-count { background: var(--green-light); color: var(--green); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* BOOK LIST */
+    .book-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .book-row {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      display: grid;
+      grid-template-columns: 52px 1fr auto;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .book-cover-thumb {
+      width: 52px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .book-cover-placeholder {
+      width: 52px;
+      height: 72px;
+      background: linear-gradient(135deg, var(--green-light), #d0e4d8);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .book-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.05rem;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+
+    .book-meta-line {
+      font-size: 12px;
+      color: var(--ink-soft);
+      font-weight: 300;
+      margin-bottom: 12px;
+    }
+
+    .book-meta-line a { color: var(--green-mid); text-decoration: none; }
+
+    .book-stats {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .meta-item { display: flex; flex-direction: column; gap: 1px; }
+
+    .meta-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+
+    .meta-value {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .status-pending  { background: var(--amber-light); color: var(--amber); }
+    .status-approved { background: var(--green-light); color: var(--green); }
+    .status-rejected { background: var(--red-light); color: var(--red); }
+
+    .progress-wrap { margin-top: 12px; }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--ink-soft);
+      margin-bottom: 5px;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      max-width: 260px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 3px;
+    }
+
+    /* ACTIONS */
+    .action-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 110px;
+    }
+
+    .btn-approve {
+      background: var(--green);
+      color: #ffffff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 4px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-align: center;
+    }
+
+    .btn-approve:hover { background: var(--green-mid); }
+
+    .btn-reject {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--red);
+      padding: 8px 14px;
+      border-radius: 4px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+
+    .btn-reject:hover { border-color: var(--red); }
+
+    .btn-preview {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--ink-soft);
+      padding: 8px 14px;
+      border-radius: 4px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-preview:hover { border-color: var(--green); color: var(--green); }
+
+    /* EMPTY / SPINNER */
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--ink-soft);
+      font-size: 14px;
+      font-weight: 300;
+    }
+
+    .empty-icon { font-size: 28px; margin-bottom: 10px; }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--border);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 40px auto;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #ffffff;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 88vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px; right: 16px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--ink-soft);
+    }
+
+    .modal-body { padding: 28px; }
+
+    .modal-info-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      background: var(--mist);
+      border-radius: 6px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+
+    .modal-info-row strong { color: var(--ink); }
+
+    .modal-genre {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+      margin-bottom: 6px;
+    }
+
+    .modal-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.6rem;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .modal-author {
+      font-size: 13px;
+      color: var(--ink-soft);
+      font-weight: 300;
+      margin-bottom: 18px;
+    }
+
+    .modal-section-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+      margin: 18px 0 8px;
+    }
+
+    .modal-blurb {
+      font-size: 14px;
+      color: var(--ink-soft);
+      font-weight: 300;
+      line-height: 1.75;
+    }
+
+    .modal-sample {
+      font-size: 14px;
+      color: var(--ink);
+      line-height: 1.85;
+      white-space: pre-wrap;
+      font-weight: 300;
+      border-left: 3px solid var(--green-light);
+      padding-left: 18px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .book-row { grid-template-columns: 44px 1fr; }
+      .action-col { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }
+    }
+  </style>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" href="/favicon.ico">
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="logo">Cable Leaf</a>
+    <span class="admin-badge">Admin</span>
+  </header>
+
+  <main class="page">
+
+    <!-- LOGIN -->
+    <div class="login-screen" id="loginScreen">
+      <p class="login-eyebrow">Admin access</p>
+      <h1 class="login-title">Cable Leaf Admin Panel</h1>
+      <div class="login-card">
+        <label for="adminEmail">Email</label>
+        <input type="email" id="adminEmail" placeholder="your@email.com" style="width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',system-ui,sans-serif;font-size:14px;color:var(--ink);background:#ffffff;outline:none;margin-bottom:16px;" />
+        <label for="pwInput">Password</label>
+        <input type="password" id="pwInput" placeholder="Enter admin password" />
+        <button class="btn-login" id="loginBtn" onclick="adminLogin()">
+          <div class="btn-spinner" style="display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#ffffff;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
+          <span class="btn-text">Sign in</span>
+        </button>
+        <p class="login-error" id="loginErr">Incorrect email or password.</p>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dashboard" id="dashboard">
+
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-title">Admin Panel</h1>
+          <p class="dash-sub">Manage all Cable Leaf submissions</p>
+        </div>
+        <button class="btn-signout" onclick="signOut()">Sign out</button>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total books</div>
+          <div class="stat-value" id="statTotal">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Impressions delivered</div>
+          <div class="stat-value" id="statImpressions">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total clicks</div>
+          <div class="stat-value" id="statClicks">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total saves</div>
+          <div class="stat-value" id="statSaves">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Reader signups</div>
+          <div class="stat-value" id="statReaders">—</div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="pending">Pending <span class="tab-count" id="cntPending">0</span></button>
+        <button class="tab-btn" data-tab="approved">Approved <span class="tab-count" id="cntApproved">0</span></button>
+        <button class="tab-btn" data-tab="rejected">Rejected <span class="tab-count" id="cntRejected">0</span></button>
+      </div>
+
+      <div class="tab-panel active" id="panelPending">
+        <div class="book-list" id="listPending"><div class="spinner"></div></div>
+      </div>
+      <div class="tab-panel" id="panelApproved">
+        <div class="book-list" id="listApproved"></div>
+      </div>
+      <div class="tab-panel" id="panelRejected">
+        <div class="book-list" id="listRejected"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const { createClient } = supabase;
+    const sb = createClient(
+      'https://zywuflscptoqzsuqgiun.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5d3VmbHNjcHRvcXpzdXFnaXVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDQ4OTIsImV4cCI6MjA4OTY4MDg5Mn0.U6QsDC1GxtzTgfKOdNHgfFaugt0DK2uRYy6ILnFUs5c'
+    );
+
+    let allBooks = [];
+
+    // ── CHECK SESSION ON LOAD ──
+    async function init() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        showDashboard();
+      }
+    }
+
+    // ── ADMIN LOGIN via SUPABASE ──
+    async function adminLogin() {
+      const email = document.getElementById('adminEmail').value.trim();
+      const pw    = document.getElementById('pwInput').value;
+      const errEl = document.getElementById('loginErr');
+      const btn   = document.getElementById('loginBtn');
+      errEl.classList.remove('visible');
+
+      if (!email || !pw) {
+        errEl.textContent = 'Please enter your email and password.';
+        errEl.classList.add('visible');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.querySelector('.btn-spinner').style.display = 'block';
+      btn.querySelector('.btn-text').style.display = 'none';
+
+      const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+
+      btn.disabled = false;
+      btn.querySelector('.btn-spinner').style.display = 'none';
+      btn.querySelector('.btn-text').style.display = 'block';
+
+      if (error) {
+        errEl.textContent = 'Incorrect email or password.';
+        errEl.classList.add('visible');
+        return;
+      }
+
+      showDashboard();
+    }
+
+    function showDashboard() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').classList.add('visible');
+      loadAll();
+    }
+
+    async function signOut() {
+      await sb.auth.signOut();
+      document.getElementById('dashboard').classList.remove('visible');
+      document.getElementById('loginScreen').style.display = 'block';
+      document.getElementById('adminEmail').value = '';
+      document.getElementById('pwInput').value = '';
+    }
+
+    async function loadAll() {
+      const { data, error } = await sb.from('books').select('*').order('created_at', { ascending: false });
+      if (error || !data) return;
+      allBooks = data;
+
+      // Stats
+      document.getElementById('statTotal').textContent       = data.length;
+      document.getElementById('statImpressions').textContent = data.reduce((s,b) => s+(b.impressions||0),0).toLocaleString();
+      document.getElementById('statClicks').textContent      = data.reduce((s,b) => s+(b.clicks||0),0).toLocaleString();
+      document.getElementById('statSaves').textContent       = data.reduce((s,b) => s+(b.saves||0),0).toLocaleString();
+
+      // Reader signups
+      const { count: readerCount } = await sb.from('readers').select('*', { count: 'exact', head: true });
+      document.getElementById('statReaders').textContent = (readerCount || 0).toLocaleString();
+
+      const pending  = data.filter(b => b.status === 'pending');
+      const approved = data.filter(b => b.status === 'approved');
+      const rejected = data.filter(b => b.status === 'rejected');
+
+      document.getElementById('cntPending').textContent  = pending.length;
+      document.getElementById('cntApproved').textContent = approved.length;
+      document.getElementById('cntRejected').textContent = rejected.length;
+
+      document.getElementById('listPending').innerHTML  = pending.length  ? pending.map(b  => bookRow(b)).join('') : emptyState('📬', 'No pending submissions.');
+      document.getElementById('listApproved').innerHTML = approved.length ? approved.map(b => bookRow(b)).join('') : emptyState('📚', 'No approved books yet.');
+      document.getElementById('listRejected').innerHTML = rejected.length ? rejected.map(b => bookRow(b)).join('') : emptyState('🗑️', 'No rejected books.');
+    }
+
+    function bookRow(book) {
+      const max = book.window_type === 'extended' ? 2500 : 1000;
+      const pct = Math.min(100, Math.round(((book.impressions||0) / max) * 100));
+      const planLabel = { basic: '1,000 imp · 30d', boost: '1,000 imp · 15d (boost)', extended: '2,500 imp · 60d' }[book.window_type] || '—';
+      const submitted = new Date(book.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+
+      return `
+        <div class="book-row" id="row-${book.id}">
+          ${book.cover_url
+            ? `<img class="book-cover-thumb" src="${book.cover_url}" alt="${book.title}" />`
+            : `<div class="book-cover-placeholder">📖</div>`}
+          <div>
+            <div class="book-title">${book.title}</div>
+            <div class="book-meta-line">
+              by ${book.author_name} · ${book.genre} · <a href="mailto:${book.author_email}">${book.author_email}</a> · Submitted ${submitted}
+            </div>
+            <div class="book-stats">
+              <div class="meta-item">
+                <span class="meta-label">Plan</span>
+                <span class="meta-value" style="font-size:12px;">${planLabel}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Impressions</span>
+                <span class="meta-value">${(book.impressions||0).toLocaleString()}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Clicks</span>
+                <span class="meta-value">${(book.clicks||0).toLocaleString()}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Saves</span>
+                <span class="meta-value">${(book.saves||0).toLocaleString()}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Status</span>
+                <span class="status-badge status-${book.status}">${book.status.charAt(0).toUpperCase()+book.status.slice(1)}</span>
+              </div>
+            </div>
+            ${book.status === 'approved' ? `
+              <div class="progress-wrap">
+                <div class="progress-label"><span>${planLabel}</span><span>${pct}% delivered</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+              </div>` : ''}
+          </div>
+          <div class="action-col">
+            <button class="btn-preview" onclick="previewBook('${book.id}')">Preview</button>
+            ${book.status === 'pending'  ? `<button class="btn-approve" onclick="approveBook('${book.id}')">Approve</button><button class="btn-reject" onclick="rejectBook('${book.id}')">Reject</button>` : ''}
+            ${book.status === 'approved' ? `<button class="btn-reject" onclick="rejectBook('${book.id}')">Unapprove</button>` : ''}
+            ${book.status === 'rejected' ? `<button class="btn-approve" onclick="approveBook('${book.id}')">Re-approve</button>` : ''}
+          </div>
+        </div>`;
+    }
+
+    async function approveBook(id) {
+      const book = allBooks.find(b => b.id === id);
+      if (!book) return;
+      const now = new Date();
+      const days = book.window_type === 'extended' ? 60 : book.window_type === 'boost' ? 15 : 30;
+      const end = new Date(now);
+      end.setDate(end.getDate() + days);
+      await sb.from('books').update({ status: 'approved', window_start: now.toISOString(), window_end: end.toISOString() }).eq('id', id);
+      loadAll();
+    }
+
+    async function rejectBook(id) {
+      await sb.from('books').update({ status: 'rejected', window_start: null, window_end: null }).eq('id', id);
+      loadAll();
+    }
+
+    async function previewBook(id) {
+      const book = allBooks.find(b => b.id === id);
+      if (!book) return;
+      document.getElementById('modalBody').innerHTML = `
+        <div class="modal-info-row">
+          <span><strong>Genre:</strong> ${book.genre}</span>
+          <span><strong>Plan:</strong> ${book.window_type || '—'}</span>
+          <span><strong>Status:</strong> <span class="status-badge status-${book.status}">${book.status}</span></span>
+          <span><strong>Email:</strong> ${book.author_email}</span>
+          ${book.external_link ? `<span><strong>Buy link:</strong> <a href="${book.external_link}" target="_blank" style="color:var(--green)">${book.external_link}</a></span>` : ''}
+        </div>
+        <p class="modal-genre">${book.genre}</p>
+        <h2 class="modal-title">${book.title}</h2>
+        <p class="modal-author">by ${book.author_name}</p>
+        <p class="modal-section-label">Blurb</p>
+        <p class="modal-blurb">${book.blurb}</p>
+        <p class="modal-section-label">Sample chapter</p>
+        <div class="modal-sample">${book.sample_chapter}</div>
+      `;
+      document.getElementById('modalOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('modalOverlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    });
+
+    function emptyState(icon, msg) {
+      return `<div class="empty-state"><div class="empty-icon">${icon}</div>${msg}</div>`;
+    }
+
+    // TABS
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel' + btn.dataset.tab.charAt(0).toUpperCase() + btn.dataset.tab.slice(1)).classList.add('active');
+      });
+    });
+
+    document.getElementById('pwInput').addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin(); });
+    document.getElementById('adminEmail').addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin(); });
+    init();
+  </script>
+</body>
+</html>

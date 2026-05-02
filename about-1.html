@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — Cable Leaf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #2d5a3d;
+      --green-light: #e8f0ea;
+      --green-mid: #4a7c5e;
+      --ink: #111810;
+      --ink-soft: #3d4a3f;
+      --mist: #f5f7f5;
+      --white: #ffffff;
+      --border: #d8e2da;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--white);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 999;
+      height: 60px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+    }
+
+    .logo {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 22px;
+      color: #111810;
+      text-decoration: none;
+    }
+
+    .header-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      list-style: none;
+    }
+
+    .header-links a { font-size: 14px; color: var(--ink-soft); text-decoration: none; }
+    .header-links a:hover { color: var(--green); }
+    .header-links .cta { background: var(--green); color: #ffffff !important; padding: 7px 16px; border-radius: 4px; font-weight: 500; }
+
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: #111810; border-radius: 2px; transition: transform 0.25s, opacity 0.25s; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-menu { display: none; position: fixed; top: 60px; left: 0; right: 0; background: #ffffff; border-bottom: 1px solid var(--border); z-index: 998; flex-direction: column; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { display: block; padding: 16px 24px; font-size: 16px; color: var(--ink-soft); text-decoration: none; border-bottom: 1px solid var(--border); }
+    .mobile-menu a:last-child { border-bottom: none; background: var(--green); color: #ffffff; font-weight: 500; text-align: center; margin: 12px 16px 16px; border-radius: 4px; }
+
+    .hero { padding: 100px 24px 60px; max-width: 720px; margin: 0 auto; }
+
+    .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-mid); margin-bottom: 16px; }
+
+    .hero-title { font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1.08; letter-spacing: -0.02em; color: var(--ink); margin-bottom: 28px; }
+    .hero-title em { font-style: italic; color: var(--green); }
+
+    .hero-body { font-size: 17px; font-weight: 300; color: var(--ink-soft); line-height: 1.85; margin-bottom: 20px; }
+
+    .divider { width: 48px; height: 3px; background: var(--green); border-radius: 2px; margin: 48px 0; }
+
+    .content-section { max-width: 720px; margin: 0 auto; padding: 0 24px 80px; }
+
+    .section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-mid); margin-bottom: 14px; }
+
+    .section-title { font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(1.6rem, 3.5vw, 2.4rem); line-height: 1.15; color: var(--ink); margin-bottom: 20px; }
+
+    .section-body { font-size: 16px; font-weight: 300; color: var(--ink-soft); line-height: 1.85; margin-bottom: 16px; }
+
+    .principles { background: var(--mist); padding: 80px 24px; }
+    .principles-inner { max-width: 720px; margin: 0 auto; }
+
+    .principle-list { display: flex; flex-direction: column; gap: 36px; margin-top: 40px; }
+    .principle-item { display: flex; gap: 20px; align-items: flex-start; }
+    .principle-number { font-family: 'DM Serif Display', Georgia, serif; font-size: 2rem; color: #c8dece; line-height: 1; flex-shrink: 0; width: 40px; }
+    .principle-item h3 { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.2rem; color: var(--ink); margin-bottom: 8px; }
+    .principle-item p { font-size: 14px; font-weight: 300; color: var(--ink-soft); line-height: 1.75; }
+
+    .manifesto { background: var(--green); padding: 80px 24px; text-align: center; }
+    .manifesto blockquote { font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(1.4rem, 3vw, 2.2rem); line-height: 1.45; color: #ffffff; font-style: italic; max-width: 600px; margin: 0 auto 20px; }
+    .manifesto cite { font-size: 12px; color: #a8d4b4; font-style: normal; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+
+    .cta-section { padding: 80px 24px; max-width: 720px; margin: 0 auto; text-align: center; }
+    .cta-title { font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(1.8rem, 4vw, 2.8rem); color: var(--ink); margin-bottom: 16px; line-height: 1.15; }
+    .cta-sub { font-size: 16px; font-weight: 300; color: var(--ink-soft); margin-bottom: 36px; line-height: 1.75; }
+    .cta-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    .btn-primary { display: inline-block; background: var(--green); color: #ffffff; padding: 13px 28px; border-radius: 4px; font-size: 15px; font-weight: 500; text-decoration: none; transition: background 0.2s; }
+    .btn-primary:hover { background: var(--green-mid); }
+    .btn-ghost { display: inline-block; border: 1px solid var(--border); color: var(--ink-soft); padding: 13px 28px; border-radius: 4px; font-size: 15px; text-decoration: none; transition: border-color 0.2s, color 0.2s; }
+    .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+
+    footer { background: var(--ink); padding: 32px 24px; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .footer-logo { font-family: 'DM Serif Display', Georgia, serif; font-size: 18px; color: #a8b8aa; }
+    footer p { font-size: 12px; color: #6a7a6c; }
+    footer ul { display: flex; gap: 20px; list-style: none; flex-wrap: wrap; }
+    footer ul a { font-size: 12px; color: #6a7a6c; text-decoration: none; }
+    footer ul a:hover { color: #a8b8aa; }
+
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      .header-links { display: none; }
+      .hamburger { display: flex; }
+      .cta-buttons { flex-direction: column; align-items: center; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" href="/favicon.ico">
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="logo">Cable Leaf</a>
+    <ul class="header-links">
+      <li><a href="browse.html">Browse books</a></li>
+      <li><a href="readers.html">Get early access</a></li>
+      <li><a href="upload.html" class="cta">Submit your book</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="browse.html">Browse books</a>
+    <a href="readers.html">Get early access</a>
+    <a href="dashboard.html">My books</a>
+    <a href="upload.html">Submit your book</a>
+  </nav>
+
+  <div class="hero">
+    <p class="eyebrow">About Cable Leaf</p>
+    <h1 class="hero-title">Built on a simple belief: every book deserves a <em>fair chance.</em></h1>
+    <p class="hero-body">Most book discovery platforms are built around popularity. The books that are already winning keep winning. The books that haven't had their moment yet stay invisible — not because they aren't good, but because the system isn't designed to find them.</p>
+    <p class="hero-body">Cable Leaf exists to change that. Not by predicting what readers will like, but by guaranteeing that every book gets a real, measurable opportunity to be seen.</p>
+    <div class="divider"></div>
+  </div>
+
+  <div class="content-section reveal">
+    <p class="section-label">The problem</p>
+    <h2 class="section-title">Visibility has become a competition — and most authors can't compete.</h2>
+    <p class="section-body">On most platforms, a book's visibility is determined by how many ratings it has, how many followers the author has, and how much early momentum it generated. Books that gain attention early keep gaining more. Books that don't — regardless of their quality — remain buried.</p>
+    <p class="section-body">This creates a system where discovery is driven by traction, not by content. Where the same titles dominate indefinitely. Where a new author's only option is to hope the algorithm notices them — or spend money on ads with no guaranteed results.</p>
+    <p class="section-body">Cable Leaf was built to remove that dynamic entirely.</p>
+  </div>
+
+  <div class="principles">
+    <div class="principles-inner">
+      <p class="section-label reveal">How we're different</p>
+      <h2 class="section-title reveal">Three principles that guide everything we build.</h2>
+      <div class="principle-list">
+        <div class="principle-item reveal">
+          <div class="principle-number">01</div>
+          <div>
+            <h3>Exposure is a product, not a reward</h3>
+            <p>Authors don't earn visibility through popularity on Cable Leaf. They receive it as a service. A defined number of impressions, over a defined period, at a flat fee. No bidding. No competition. No uncertainty.</p>
+          </div>
+        </div>
+        <div class="principle-item reveal">
+          <div class="principle-number">02</div>
+          <div>
+            <h3>No social signals, ever</h3>
+            <p>There are no ratings, reviews, likes, or follower counts on Cable Leaf. These signals introduce bias and shift attention toward what's already popular. We exclude them deliberately — not as a limitation, but as a feature.</p>
+          </div>
+        </div>
+        <div class="principle-item reveal">
+          <div class="principle-number">03</div>
+          <div>
+            <h3>Transparency over algorithms</h3>
+            <p>Authors know exactly what they're getting before they pay. Readers see books based on their genre preferences, not based on what an algorithm decided they should see. Everything is predictable, measurable, and honest.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-section reveal" style="padding-top:80px;">
+    <p class="section-label">For readers</p>
+    <h2 class="section-title">Discover books the world hasn't found yet.</h2>
+    <p class="section-body">Cable Leaf gives readers something most platforms don't — genuine discovery. Not a feed of books you've already heard of, but a rotating collection of unknown authors who've earned their place in front of you.</p>
+    <p class="section-body">No account required to browse. No social pressure. No popularity bias shaping what you see. Just books, matched to what you actually like to read, with a sample chapter so you can decide for yourself.</p>
+  </div>
+
+  <div class="manifesto">
+    <blockquote>"Visibility shouldn't be a competition. Every book deserves a real chance to be noticed — regardless of who wrote it or how many followers they have."</blockquote>
+    <cite>— The Cable Leaf Principle</cite>
+  </div>
+
+  <div class="cta-section reveal">
+    <h2 class="cta-title">Ready to be part of something fairer?</h2>
+    <p class="cta-sub">Whether you're an author looking for guaranteed exposure or a reader looking for your next hidden gem — Cable Leaf was built for you.</p>
+    <div class="cta-buttons">
+      <a href="upload.html" class="btn-primary">Submit your book</a>
+      <a href="readers.html" class="btn-ghost">Get early access as a reader</a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-logo">Cable Leaf</span>
+      <p>&#169; 2026 Cable Leaf. Built for unknown authors, everywhere.</p>
+      <ul>
+        <li><a href="about.html">About</a></li>
+        <li><a href="upload.html">Authors</a></li>
+        <li><a href="readers.html">Readers</a></li>
+        <li><a href="mailto:adeniyi.abdullah.adebayo@gmail.com">Contact</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('hamburger').addEventListener('click', function() {
+      this.classList.toggle('open');
+      document.getElementById('mobileMenu').classList.toggle('open');
+    });
+
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 100);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
