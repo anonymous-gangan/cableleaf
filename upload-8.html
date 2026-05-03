@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submit Your Book — Cable Leaf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #2d5a3d;
+      --green-light: #e8f0ea;
+      --green-mid: #4a7c5e;
+      --ink: #111810;
+      --ink-soft: #3d4a3f;
+      --mist: #f5f7f5;
+      --white: #ffffff;
+      --border: #d8e2da;
+      --red: #c0392b;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--mist);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* HEADER */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 999;
+      height: 60px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+    }
+
+    .logo {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 22px;
+      color: #111810;
+      text-decoration: none;
+    }
+
+    .header-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      list-style: none;
+    }
+
+    .header-links a {
+      font-size: 14px;
+      color: var(--ink-soft);
+      text-decoration: none;
+    }
+
+    .header-links a:hover { color: var(--green); }
+
+    .header-links .cta {
+      background: var(--green);
+      color: #ffffff !important;
+      padding: 7px 16px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #111810;
+      border-radius: 2px;
+      transition: transform 0.25s, opacity 0.25s;
+    }
+
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 60px; left: 0; right: 0;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      z-index: 998;
+      flex-direction: column;
+    }
+
+    .mobile-menu.open { display: flex; }
+
+    .mobile-menu a {
+      display: block;
+      padding: 16px 24px;
+      font-size: 16px;
+      color: var(--ink-soft);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .mobile-menu a:last-child {
+      border-bottom: none;
+      background: var(--green);
+      color: #ffffff;
+      font-weight: 500;
+      text-align: center;
+      margin: 12px 16px 16px;
+      border-radius: 4px;
+    }
+
+    /* PAGE */
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 90px 24px 80px;
+    }
+
+    /* PAGE HEADER */
+    .page-eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+      margin-bottom: 12px;
+    }
+
+    .page-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 2.2rem;
+      line-height: 1.1;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+
+    .page-intro {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--ink-soft);
+      line-height: 1.75;
+      margin-bottom: 40px;
+      max-width: 52ch;
+    }
+
+    /* PLAN SELECTOR */
+    .plan-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 40px;
+    }
+
+    .plan-option {
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+
+    .plan-option:hover { border-color: var(--green-mid); }
+    .plan-option.selected { border-color: var(--green); background: var(--green-light); }
+
+    .plan-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+    }
+
+    .plan-popular {
+      position: absolute;
+      top: -10px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--green);
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .plan-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .plan-price {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.75rem;
+      color: var(--green);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .plan-desc {
+      font-size: 11px;
+      color: var(--ink-soft);
+      font-weight: 300;
+      line-height: 1.5;
+    }
+
+    /* FORM */
+    .form-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 36px;
+    }
+
+    .form-section-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.2rem;
+      color: var(--ink);
+      margin-bottom: 24px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 7px;
+    }
+
+    label span {
+      font-weight: 300;
+      color: var(--ink-soft);
+      font-size: 12px;
+      margin-left: 4px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="url"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      background: #ffffff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      appearance: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(45,90,61,0.08);
+    }
+
+    input.error,
+    select.error,
+    textarea.error {
+      border-color: var(--red);
+    }
+
+    .error-msg {
+      font-size: 12px;
+      color: var(--red);
+      margin-top: 5px;
+      display: none;
+    }
+
+    .error-msg.visible { display: block; }
+
+    textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%233d4a3f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+
+    /* FILE UPLOAD */
+    .file-upload {
+      border: 2px dashed var(--border);
+      border-radius: 6px;
+      padding: 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+
+    .file-upload:hover { border-color: var(--green-mid); background: var(--green-light); }
+    .file-upload.dragover { border-color: var(--green); background: var(--green-light); }
+
+    .file-upload input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .file-upload-icon { font-size: 28px; margin-bottom: 8px; }
+
+    .file-upload p {
+      font-size: 13px;
+      color: var(--ink-soft);
+      font-weight: 300;
+    }
+
+    .file-upload strong {
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    .file-name {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--green);
+      font-weight: 500;
+      display: none;
+    }
+
+    /* DIVIDER */
+    .form-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 32px 0;
+    }
+
+    /* CHAR COUNT */
+    .char-count {
+      font-size: 11px;
+      color: var(--ink-soft);
+      text-align: right;
+      margin-top: 4px;
+      font-weight: 300;
+    }
+
+    .char-count.over { color: var(--red); }
+
+    /* TERMS */
+    .terms-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 28px;
+    }
+
+    .terms-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      accent-color: var(--green);
+      cursor: pointer;
+    }
+
+    .terms-row label {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--ink-soft);
+      margin-bottom: 0;
+      cursor: pointer;
+    }
+
+    .terms-row a { color: var(--green); }
+
+    /* SUBMIT */
+    .submit-btn {
+      width: 100%;
+      background: var(--green);
+      color: #ffffff;
+      border: none;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .submit-btn:hover { background: var(--green-mid); }
+    .submit-btn:disabled { background: #a8b8aa; cursor: not-allowed; }
+
+    .submit-spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    .submit-btn.loading .submit-spinner { display: block; }
+    .submit-btn.loading .submit-text { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* SUCCESS STATE */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .success-screen.visible { display: block; }
+
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--green-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 24px;
+    }
+
+    .success-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.8rem;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+
+    .success-msg {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--ink-soft);
+      max-width: 40ch;
+      margin: 0 auto 28px;
+      line-height: 1.75;
+    }
+
+    .btn-browse {
+      display: inline-block;
+      background: var(--green);
+      color: #ffffff;
+      padding: 12px 28px;
+      border-radius: 4px;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    /* INFO BOX */
+    .info-box {
+      background: var(--green-light);
+      border-left: 3px solid var(--green);
+      border-radius: 4px;
+      padding: 14px 18px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--ink-soft);
+      font-weight: 300;
+      line-height: 1.65;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .header-links { display: none; }
+      .hamburger { display: flex; }
+      .plan-selector { grid-template-columns: 1fr; }
+      .form-card { padding: 24px 20px; }
+    }
+  </style>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" href="/favicon.ico">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <a href="index.html" class="logo">Cable Leaf</a>
+    <ul class="header-links">
+      <li><a href="browse.html">Browse books</a></li>
+      <li><a href="dashboard.html">My books</a></li>
+      <li><a href="upload.html" class="cta">Submit your book</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="browse.html">Browse books</a>
+    <a href="dashboard.html">My books</a>
+    <a href="upload.html">Submit your book</a>
+  </nav>
+
+  <!-- PAGE -->
+  <main class="page">
+
+    <!-- SUCCESS SCREEN -->
+    <div class="success-screen" id="successScreen">
+      <div class="success-icon">✓</div>
+      <h2 class="success-title">Payment successful!</h2>
+      <p class="success-msg">Your book has been submitted and payment confirmed. We'll review your submission within 48 hours. Once approved, your discovery window will begin.</p>
+      <a href="browse.html" class="btn-browse">Browse other books</a>
+    </div>
+
+    <!-- FORM -->
+    <div id="formWrapper">
+      <p class="page-eyebrow">Submit your book</p>
+      <h1 class="page-title">Get your book in front of readers.</h1>
+      <p class="page-intro">Choose a discovery window, fill in your book details, and we'll handle the rest. Your book will be shown to real readers — guaranteed.</p>
+
+      <!-- PLAN SELECTOR -->
+      <div class="plan-selector" id="planSelector">
+        <div class="plan-option selected" data-plan="basic" data-price="25">
+          <input type="radio" name="plan" value="basic" checked />
+          <div class="plan-name">Discovery Window</div>
+          <div class="plan-price">$25</div>
+          <div class="plan-desc">1,000 impressions<br>over 30 days</div>
+        </div>
+        <div class="plan-option" data-plan="boost" data-price="40">
+          <div class="plan-popular">Most popular</div>
+          <input type="radio" name="plan" value="boost" />
+          <div class="plan-name">Discovery + Boost</div>
+          <div class="plan-price">$40</div>
+          <div class="plan-desc">1,000 impressions<br>in 15 days (2× speed)</div>
+        </div>
+        <div class="plan-option" data-plan="extended" data-price="49">
+          <input type="radio" name="plan" value="extended" />
+          <div class="plan-name">Extended Window</div>
+          <div class="plan-price">$49</div>
+          <div class="plan-desc">2,500 impressions<br>over 60 days</div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        Your book will be reviewed within 48 hours of submission. Payment is collected after approval — you won't be charged until we confirm your book meets our guidelines.
+      </div>
+
+      <!-- FORM CARD -->
+      <div class="form-card">
+
+        <!-- BOOK DETAILS -->
+        <h2 class="form-section-title">Book details</h2>
+
+        <div class="form-group">
+          <label for="title">Book title</label>
+          <input type="text" id="title" placeholder="e.g. The Quiet Shore" maxlength="120" />
+          <div class="error-msg" id="titleErr">Please enter your book title.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="authorName">Author name <span>(as it appears on the book)</span></label>
+          <input type="text" id="authorName" placeholder="e.g. Jane Okafor" maxlength="80" />
+          <div class="error-msg" id="authorNameErr">Please enter your author name.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="genre">Genre</label>
+          <select id="genre">
+            <option value="">Select a genre</option>
+            <option value="Fiction">Fiction</option>
+            <option value="Literary Fiction">Literary Fiction</option>
+            <option value="Non-Fiction">Non-Fiction</option>
+            <option value="Mystery">Mystery</option>
+            <option value="Romance">Romance</option>
+            <option value="Sci-Fi">Sci-Fi</option>
+            <option value="Fantasy">Fantasy</option>
+            <option value="Thriller">Thriller</option>
+            <option value="Horror">Horror</option>
+            <option value="Young Adult">Young Adult</option>
+            <option value="Biography">Biography</option>
+            <option value="Memoir">Memoir</option>
+            <option value="Self-Help">Self-Help</option>
+            <option value="Poetry">Poetry</option>
+            <option value="Other">Other</option>
+
+          </select>
+          <div class="error-msg" id="genreErr">Please select a genre.</div>
+        </div>
+
+        <div class="form-group" id="otherGenreGroup" style="display:none;">
+          <label for="otherGenre">Describe your genre <span>(shown to readers as-is)</span></label>
+          <input type="text" id="otherGenre" placeholder="e.g. Afrofuturism, Magical Realism, Graphic Novel..." maxlength="40" />
+          <div class="error-msg" id="otherGenreErr">Please describe your genre.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="blurb">Book blurb <span>(what readers see first)</span></label>
+          <textarea id="blurb" placeholder="Write a compelling 2–4 sentence description of your book..." maxlength="400" rows="4"></textarea>
+          <div class="char-count" id="blurbCount">0 / 400</div>
+          <div class="error-msg" id="blurbErr">Please write a blurb for your book.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="sampleChapter">Sample chapter <span>(readers will see this in full)</span></label>
+          <textarea id="sampleChapter" placeholder="Paste your sample chapter here..." rows="10" maxlength="8000"></textarea>
+          <div class="char-count" id="sampleCount">0 / 8000</div>
+          <div class="error-msg" id="sampleErr">Please include a sample chapter.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Book cover <span>(JPG or PNG, max 2MB)</span></label>
+          <div class="file-upload" id="coverUploadArea">
+            <input type="file" id="coverFile" accept="image/jpeg,image/png" />
+            <div class="file-upload-icon">🖼️</div>
+            <p><strong>Click to upload</strong> or drag and drop your cover image</p>
+            <p>JPG or PNG · Max 2MB</p>
+            <div class="file-name" id="coverFileName"></div>
+          </div>
+          <div class="error-msg" id="coverErr">Please upload a cover image.</div>
+        </div>
+
+        <div class="form-divider"></div>
+
+        <!-- AUTHOR DETAILS -->
+        <h2 class="form-section-title">Your details</h2>
+
+        <div class="form-group">
+          <label for="authorEmail">Email address <span>(for dashboard access and updates)</span></label>
+          <input type="email" id="authorEmail" placeholder="you@example.com" />
+          <div class="error-msg" id="authorEmailErr">Please enter a valid email address.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="externalLink">Where can readers buy your book? <span>(optional)</span></label>
+          <input type="url" id="externalLink" placeholder="https://amazon.com/your-book or your website" />
+          <div class="error-msg" id="externalLinkErr">Please enter a valid URL (starting with https://).</div>
+        </div>
+
+        <div class="form-divider"></div>
+
+        <!-- TERMS -->
+        <div class="terms-row">
+          <input type="checkbox" id="termsCheck" />
+          <label for="termsCheck">I confirm this is my original work and I have the rights to submit it. I understand my book will be reviewed before going live.</label>
+        </div>
+        <div class="error-msg" id="termsErr" style="margin-top:-16px; margin-bottom:20px;">Please confirm you agree to the terms.</div>
+
+        <!-- SUBMIT -->
+        <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">
+          <div class="submit-spinner"></div>
+          <span class="submit-text">Proceed to payment</span>
+        </button>
+        <div id="debugMsg" style="margin-top:12px;font-size:13px;color:#c0392b;display:none;"></div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // ── SUPABASE ──
+    const { createClient } = supabase;
+    const sb = createClient(
+      'https://zywuflscptoqzsuqgiun.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5d3VmbHNjcHRvcXpzdXFnaXVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDQ4OTIsImV4cCI6MjA4OTY4MDg5Mn0.U6QsDC1GxtzTgfKOdNHgfFaugt0DK2uRYy6ILnFUs5c'
+    );
+
+    // ── PLAN SELECTION ──
+    let selectedPlan = 'basic';
+
+    document.querySelectorAll('.plan-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        opt.querySelector('input[type="radio"]').checked = true;
+        selectedPlan = opt.dataset.plan;
+      });
+    });
+
+    // ── OTHER GENRE TOGGLE ──
+    document.getElementById('genre').addEventListener('change', function() {
+      const otherGroup = document.getElementById('otherGenreGroup');
+      otherGroup.style.display = this.value === 'Other' ? 'block' : 'none';
+      if (this.value !== 'Other') document.getElementById('otherGenre').value = '';
+    });
+
+    // ── CHAR COUNTERS ──
+    function setupCharCount(inputId, countId, max) {
+      const el = document.getElementById(inputId);
+      const counter = document.getElementById(countId);
+      el.addEventListener('input', () => {
+        const len = el.value.length;
+        counter.textContent = `${len} / ${max}`;
+        counter.classList.toggle('over', len >= max);
+      });
+    }
+
+    setupCharCount('blurb', 'blurbCount', 400);
+    setupCharCount('sampleChapter', 'sampleCount', 8000);
+
+    // ── FILE UPLOAD ──
+    const coverFile = document.getElementById('coverFile');
+    const coverArea = document.getElementById('coverUploadArea');
+    const coverFileName = document.getElementById('coverFileName');
+
+    coverFile.addEventListener('change', () => {
+      if (coverFile.files[0]) {
+        coverFileName.textContent = '✓ ' + coverFile.files[0].name;
+        coverFileName.style.display = 'block';
+        coverArea.style.borderColor = 'var(--green)';
+      }
+    });
+
+    ['dragover', 'dragleave', 'drop'].forEach(evt => {
+      coverArea.addEventListener(evt, (e) => {
+        e.preventDefault();
+        coverArea.classList.toggle('dragover', evt === 'dragover');
+      });
+    });
+
+    // ── VALIDATION ──
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function validateUrl(url) {
+      if (!url) return true; // optional
+      try { new URL(url); return true; } catch { return false; }
+    }
+
+    function setError(fieldId, errId, show) {
+      const field = document.getElementById(fieldId);
+      const err = document.getElementById(errId);
+      if (field) field.classList.toggle('error', show);
+      if (err) err.classList.toggle('visible', show);
+      return !show;
+    }
+
+    function validate() {
+      const title = document.getElementById('title').value.trim();
+      const authorName = document.getElementById('authorName').value.trim();
+      const genre = document.getElementById('genre').value;
+      const blurb = document.getElementById('blurb').value.trim();
+      const sample = document.getElementById('sampleChapter').value.trim();
+      const email = document.getElementById('authorEmail').value.trim();
+      const link = document.getElementById('externalLink').value.trim();
+      const terms = document.getElementById('termsCheck').checked;
+      const cover = coverFile.files[0];
+
+      let valid = true;
+      const genreVal = document.getElementById('genre').value;
+      const otherGenre = document.getElementById('otherGenre').value.trim();
+      const isOther = genreVal === 'Other';
+
+      valid = setError('title', 'titleErr', !title) && valid;
+      valid = setError('authorName', 'authorNameErr', !authorName) && valid;
+      valid = setError('genre', 'genreErr', !genreVal) && valid;
+      if (isOther) { valid = setError('otherGenre', 'otherGenreErr', !otherGenre) && valid; }
+      valid = setError('blurb', 'blurbErr', !blurb) && valid;
+      valid = setError('sampleChapter', 'sampleErr', !sample) && valid;
+      valid = setError('coverFile', 'coverErr', !cover) && valid;
+      valid = setError('authorEmail', 'authorEmailErr', !validateEmail(email)) && valid;
+      valid = setError('externalLink', 'externalLinkErr', !validateUrl(link)) && valid;
+
+      const termsErr = document.getElementById('termsErr');
+      if (!terms) { termsErr.classList.add('visible'); valid = false; }
+      else termsErr.classList.remove('visible');
+
+      return valid;
+    }
+
+    // ── SUBMIT ──
+    const PAYSTACK_KEY = 'pk_test_ad8bf5ab0c1bb977be75c6c579cd5307fee16fa5'; // TEST MODE
+    const PLAN_PRICES = { basic: 25, boost: 40, extended: 49 };
+
+    // Live exchange rate — fetched on page load
+    let USD_TO_NGN = 1354; // fallback rate
+
+    async function fetchExchangeRate() {
+      try {
+        const res = await fetch('https://api.frankfurter.app/latest?from=USD&to=NGN');
+        const data = await res.json();
+        if (data && data.rates && data.rates.NGN) {
+          USD_TO_NGN = data.rates.NGN;
+        }
+      } catch (e) {
+        console.log('Using fallback exchange rate:', USD_TO_NGN);
+      }
+    }
+
+    function handleSubmit() {
+      const debugMsg = document.getElementById('debugMsg');
+      debugMsg.style.display = 'none';
+
+      if (typeof PaystackPop === 'undefined') {
+        debugMsg.textContent = 'Error: Paystack script not loaded. Check your internet connection.';
+        debugMsg.style.display = 'block';
+        return;
+      }
+
+      if (!validate()) return;
+
+      const email = document.getElementById('authorEmail').value.trim();
+      const amountNGN = Math.round(PLAN_PRICES[selectedPlan] * USD_TO_NGN) * 100;
+
+      const handler = PaystackPop.setup({
+        key: PAYSTACK_KEY,
+        email: email,
+        amount: amountNGN,
+        currency: 'NGN',
+        ref: 'CL-' + Date.now(),
+        metadata: {
+          plan: selectedPlan,
+          custom_fields: [
+            { display_name: "Plan", variable_name: "plan", value: selectedPlan },
+            { display_name: "Author Email", variable_name: "author_email", value: email }
+          ]
+        },
+        callback: function(response) {
+          submitBook(response.reference);
+        },
+        onClose: function() {
+          debugMsg.textContent = 'Payment cancelled. Click the button again when ready.';
+          debugMsg.style.display = 'block';
+          debugMsg.style.color = '#d97706';
+        }
+      });
+
+      handler.openIframe();
+    }
+
+    async function submitBook(paymentRef) {
+      const btn = document.getElementById('submitBtn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      try {
+        // Upload cover image
+        const file = coverFile.files[0];
+        const fileName = `covers/${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+
+        const { data: uploadData, error: uploadError } = await sb.storage
+          .from('book-assets')
+          .upload(fileName, file, { contentType: file.type });
+
+        if (uploadError) throw new Error('Cover upload failed: ' + uploadError.message);
+
+        const { data: urlData } = sb.storage.from('book-assets').getPublicUrl(fileName);
+        const coverUrl = urlData.publicUrl;
+
+        // Insert book record with payment reference
+        const { error: insertError } = await sb.from('books').insert({
+          title: document.getElementById('title').value.trim(),
+          author_name: document.getElementById('authorName').value.trim(),
+          genre: document.getElementById('genre').value === 'Other' ? document.getElementById('otherGenre').value.trim() : document.getElementById('genre').value,
+          blurb: document.getElementById('blurb').value.trim(),
+          sample_chapter: document.getElementById('sampleChapter').value.trim(),
+          author_email: document.getElementById('authorEmail').value.trim(),
+          external_link: document.getElementById('externalLink').value.trim() || null,
+          cover_url: coverUrl,
+          status: 'pending',
+          window_type: selectedPlan,
+          payment_ref: paymentRef,
+        });
+
+        if (insertError) throw new Error('Submission failed: ' + insertError.message);
+
+        document.getElementById('formWrapper').style.display = 'none';
+        document.getElementById('successScreen').classList.add('visible');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      } catch (err) {
+        alert('Payment was successful but submission failed: ' + err.message + '\n\nPlease contact us at adeniyi.abdullah.adebayo@gmail.com with your payment reference: ' + paymentRef);
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    }
+
+    // ── HAMBURGER ──
+    document.getElementById('hamburger').addEventListener('click', function() {
+      this.classList.toggle('open');
+      document.getElementById('mobileMenu').classList.toggle('open');
+    });
+
+    // Fetch live exchange rate on load
+    fetchExchangeRate();
+
+    // Clear errors on input
+    ['title','authorName','genre','blurb','sampleChapter','authorEmail','externalLink'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => el.classList.remove('error'));
+    });
+  </script>
+</body>
+</html>
